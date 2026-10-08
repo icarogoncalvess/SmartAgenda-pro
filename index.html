@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Inteligente & Dashboard</title>
-    <!-- Tailwind CSS para um design top -->
+    <title>SmartAgenda Pro - Semanal & Alarmes</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,10 +22,14 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white">SmartAgenda Pro</h1>
-                    <p class="text-xs text-slate-400">Organização inteligente com tempo extra e sincronização</p>
+                    <p class="text-xs text-slate-400">Planejamento semanal, deslocamento e alarmes flexíveis</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
+                <button onclick="ativarAlarmeSite()" id="btn-notif" class="bg-indigo-600/25 hover:bg-indigo-600/35 text-indigo-300 text-xs font-medium px-3.5 py-2 rounded-lg border border-indigo-500/30 transition flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    Ativar Alarme no Site (PC)
+                </button>
                 <button onclick="exportarCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3.5 py-2 rounded-lg border border-slate-700 transition flex items-center gap-2">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Exportar Planilha (CSV)
@@ -33,6 +37,19 @@
             </div>
         </div>
     </header>
+
+    <!-- Seletor de Dias da Semana -->
+    <nav class="bg-slate-900/80 border-b border-slate-800 py-3 px-4">
+        <div class="max-w-7xl mx-auto flex gap-2 overflow-x-auto pb-1">
+            <button onclick="mudarDia('segunda')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" data-dia="segunda">Segunda-feira</button>
+            <button onclick="mudarDia('terca')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="terca">Terça-feira</button>
+            <button onclick="mudarDia('quarta')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="quarta">Quarta-feira</button>
+            <button onclick="mudarDia('quinta')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="quinta">Quinta-feira</button>
+            <button onclick="mudarDia('sexta')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="sexta">Sexta-feira</button>
+            <button onclick="mudarDia('sabado')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="sabado">Sábado</button>
+            <button onclick="mudarDia('domingo')" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white" data-dia="domingo">Domingo</button>
+        </div>
+    </nav>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -42,7 +59,7 @@
             
             <!-- Dashboard Card -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Dashboard do Dia</h2>
+                <h2 id="dashboard-title" class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Dashboard - Segunda</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
                         <span class="text-xs text-slate-400 block">Total de Tarefas</span>
@@ -66,11 +83,11 @@
 
             <!-- Formulário para Adicionar Tarefa -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Nova Tarefa</h2>
+                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Nova Tarefa para o Dia</h2>
                 <form id="task-form" onsubmit="adicionarTarefa(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Título da Tarefa</label>
-                        <input type="text" id="titulo" required placeholder="Ex: Reunião de Projeto / Deslocamento" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Título da Tarefa / Compromisso</label>
+                        <input type="text" id="titulo" required placeholder="Ex: Trabalho / Aula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -78,17 +95,22 @@
                             <input type="time" id="hora-inicio" required value="08:00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-300 mb-1">Duração (min)</label>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Duração Ação (min)</label>
                             <input type="number" id="duracao" required min="5" value="30" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Tempo Extra / Folga (min)</label>
-                        <input type="number" id="tempo-extra" min="0" value="10" placeholder="Ex: Trânsito, imprevistos" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
-                        <span class="text-[10px] text-slate-500 mt-1 block">Adiciona respiro e empurra automaticamente os horários seguintes.</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Deslocamento Prévio (min)</label>
+                            <input type="number" id="deslocamento" min="0" value="0" placeholder="Ex: Saída" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Tempo Extra Pós (min)</label>
+                            <input type="number" id="tempo-extra" min="0" value="0" placeholder="Ex: Volta" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 text-sm">
-                        Adicionar à Agenda
+                        Adicionar ao Dia
                     </button>
                 </form>
             </div>
@@ -98,10 +120,10 @@
         <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Sua Linha do Tempo</h2>
-                    <p class="text-xs text-slate-400">Os horários são recalculados em cascata considerando o tempo extra.</p>
+                    <h2 id="timeline-title" class="text-lg font-bold text-white">Linha do Tempo - Segunda-feira</h2>
+                    <p class="text-xs text-slate-400">Recálculo automático e opções rápidas de alarme para celular e PC.</p>
                 </div>
-                <button onclick="limparTudo()" class="text-xs text-rose-400 hover:text-rose-300 transition font-medium">Limpar Agenda</button>
+                <button onclick="limparDiaAtual()" class="text-xs text-rose-400 hover:text-rose-300 transition font-medium">Limpar Este Dia</button>
             </div>
 
             <!-- Lista de Tarefas -->
@@ -109,7 +131,7 @@
                 <!-- Estado Vazio -->
                 <div id="empty-state" class="text-center py-16">
                     <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <p class="text-slate-400 text-sm font-medium">Nenhuma tarefa cadastrada ainda.</p>
+                    <p class="text-slate-400 text-sm font-medium">Nenhuma tarefa programada para este dia.</p>
                     <p class="text-slate-500 text-xs mt-1">Adicione sua primeira atividade usando o painel ao lado.</p>
                 </div>
             </div>
@@ -117,12 +139,34 @@
 
     </main>
 
-    <!-- Script de Gestão da Agenda -->
+    <!-- Script de Gestão -->
     <script>
-        let tarefas = JSON.parse(localStorage.getItem('smart_agenda_tarefas')) || [];
+        let diaAtual = 'segunda';
+        let dadosSemana = JSON.parse(localStorage.getItem('smart_agenda_semanal_v2')) || {
+            segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [], domingo: []
+        };
+
+        const nomesDias = {
+            segunda: 'Segunda-feira', terca: 'Terça-feira', quarta: 'Quarta-feira',
+            quinta: 'Quinta-feira', sexta: 'Sexta-feira', sabado: 'Sábado', domingo: 'Domingo'
+        };
+
+        function mudarDia(dia) {
+            diaAtual = dia;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if(btn.dataset.dia === dia) {
+                    btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-indigo-600 text-white shadow-lg shadow-indigo-600/30";
+                } else {
+                    btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white";
+                }
+            });
+            document.getElementById('dashboard-title').innerText = `Dashboard - ${nomesDias[dia].split('-')[0]}`;
+            document.getElementById('timeline-title').innerText = `Linha do Tempo - ${nomesDias[dia]}`;
+            renderizar();
+        }
 
         function salvarStorage() {
-            localStorage.setItem('smart_agenda_tarefas', JSON.stringify(tarefas));
+            localStorage.setItem('smart_agenda_semanal_v2', JSON.stringify(dadosSemana));
             renderizar();
         }
 
@@ -142,6 +186,7 @@
             const titulo = document.getElementById('titulo').value;
             const horaInicio = document.getElementById('hora-inicio').value;
             const duracao = parseInt(document.getElementById('duracao').value);
+            const deslocamento = parseInt(document.getElementById('deslocamento').value) || 0;
             const tempoExtra = parseInt(document.getElementById('tempo-extra').value) || 0;
 
             const novaTarefa = {
@@ -149,48 +194,121 @@
                 titulo,
                 horaInicioBase: horaInicio,
                 duracao,
+                deslocamento,
                 tempoExtra,
-                concluida: false
+                concluida: false,
+                alarmeSite: false
             };
 
-            tarefas.push(novaTarefa);
+            dadosSemana[diaAtual].push(novaTarefa);
             document.getElementById('task-form').reset();
             document.getElementById('hora-inicio').value = '08:00';
             salvarStorage();
         }
 
         function alternarConcluida(id) {
-            tarefas = tarefas.map(t => t.id === id ? { ...t, concluida: !t.concluida } : t);
+            dadosSemana[diaAtual] = dadosSemana[diaAtual].map(t => t.id === id ? { ...t, concluida: !t.concluida } : t);
             salvarStorage();
         }
 
         function excluirTarefa(id) {
-            tarefas = tarefas.filter(t => t.id !== id);
+            dadosSemana[diaAtual] = dadosSemana[diaAtual].filter(t => t.id !== id);
             salvarStorage();
         }
 
-        function limparTudo() {
-            if (confirm("Deseja realmente limpar toda a agenda?")) {
-                tarefas = [];
+        function limparDiaAtual() {
+            if (confirm(`Deseja limpar todas as tarefas de ${nomesDias[diaAtual]}?`)) {
+                dadosSemana[diaAtual] = [];
                 salvarStorage();
             }
         }
 
+        function ativarAlarmeSite() {
+            if (!("Notification" in window)) {
+                alert("Este navegador não suporta notificações.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("Alarme no site ativado! Mantenha a aba aberta para receber avisos visuais e sonoros no PC.");
+                    const btn = document.getElementById('btn-notif');
+                    btn.className = "bg-emerald-600/25 text-emerald-300 text-xs font-medium px-3.5 py-2 rounded-lg border border-emerald-500/30 transition flex items-center gap-2";
+                    btn.innerHTML = '✓ Alarme PC Ativo';
+                }
+            });
+        }
+
+        function tocarSomPC() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.0);
+            } catch (e) {}
+        }
+
+        function alternarAlarmeSite(id) {
+            const tarefa = dadosSemana[diaAtual].find(t => t.id === id);
+            if (!tarefa) return;
+            tarefa.alarmeSite = !tarefa.alarmeSite;
+            salvarStorage();
+            if (tarefa.alarmeSite) {
+                alert(`Alarme na tela do PC ativado para "${tarefa.titulo}".`);
+            }
+        }
+
+        // Guia para configurar no relógio do celular
+        function abrirAlarmeCelular(titulo, horario) {
+            alert(`📱 ALARME PARA O CELULAR\n\nAbra o aplicativo de Relógio do seu smartphone e configure:\n• Horário: ${horario}\n• Rótulo/Nome: ${titulo}`);
+        }
+
+        // Verificador de alarme do PC (roda a cada segundo)
+        setInterval(() => {
+            const agora = new Date();
+            const diasMap = { 0: 'domingo', 1: 'segunda', 2: 'terca', 3: 'quarta', 4: 'quinta', 5: 'sexta', 6: 'sabado' };
+            const diaHojeStr = diasMap[agora.getDay()];
+
+            if (diaHojeStr !== diaAtual) return;
+
+            const horaAtualStr = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+            if (agora.getSeconds() === 0) {
+                dadosSemana[diaAtual].forEach(t => {
+                    if (t.alarmeSite && !t.concluida) {
+                        const horarioAlvo = t.deslocamento > 0 ? converterMinutosParaHora(converterHoraParaMinutos(t.horaInicioBase)) : t.horaInicioBase;
+                        if (horarioAlvo === horaAtualStr) {
+                            tocarSomPC();
+                            if (Notification.permission === "granted") {
+                                new Notification("⏰ Alarme SmartAgenda Pro", {
+                                    body: `Compromisso agora: ${t.titulo}`,
+                                    icon: "https://cdn-icons-png.flaticon.com/512/3236/3236940.png"
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        }, 1000);
+
         function renderizar() {
             const lista = document.getElementById('task-list');
             const emptyState = document.getElementById('empty-state');
+            const tarefas = dadosSemana[diaAtual];
             
-            // Estatísticas
             const total = tarefas.length;
             const concluidas = tarefas.filter(t => t.concluida).length;
             document.getElementById('stat-total').innerText = total;
             document.getElementById('stat-concluidas').innerText = concluidas;
 
             let minutosTotaisGanhos = 0;
-            tarefas.forEach(t => minutosTotaisGanhos += t.duracao + t.tempoExtra);
+            tarefas.forEach(t => minutosTotaisGanhos += t.deslocamento + t.duracao + t.tempoExtra);
             document.getElementById('stat-tempo').innerText = `${Math.floor(minutosTotaisGanhos / 60)}h ${minutosTotaisGanhos % 60}min`;
 
-            // Limpa elementos antigos mantendo o empty state se necessário
             const itensAntigos = lista.querySelectorAll('.task-item');
             itensAntigos.forEach(el => el.remove());
 
@@ -200,29 +318,34 @@
             }
             emptyState.style.display = 'none';
 
-            // Cálculo em cascata de horários
             let proximoHorarioMinutos = null;
 
             tarefas.forEach((tarefa, index) => {
-                let inicioMinutos;
+                let inicioBaseMinutos;
                 if (index === 0) {
-                    inicioMinutos = converterHoraParaMinutos(tarefa.horaInicioBase);
+                    inicioBaseMinutos = converterHoraParaMinutos(tarefa.horaInicioBase);
                 } else {
-                    inicioMinutos = proximoHorarioMinutos !== null ? proximoHorarioMinutos : converterHoraParaMinutos(tarefa.horaInicioBase);
+                    inicioBaseMinutos = proximoHorarioMinutos !== null ? proximoHorarioMinutos : converterHoraParaMinutos(tarefa.horaInicioBase);
                 }
 
-                const fimAtividadeMinutos = inicioMinutos + tarefa.duracao;
-                const fimComExtraMinutos = fimAtividadeMinutos + tarefa.tempoExtra;
-                proximoHorarioMinutos = fimComExtraMinutos;
+                const inicioDeslocamentoMinutos = inicioBaseMinutos;
+                const inicioAcaoMinutos = inicioDeslocamentoMinutos + tarefa.deslocamento;
+                const fimAcaoMinutos = inicioAcaoMinutos + tarefa.duracao;
+                const fimTotalMinutos = fimAcaoMinutos + tarefa.tempoExtra;
+                
+                proximoHorarioMinutos = fimTotalMinutos;
 
-                const horaInicioFormatada = converterMinutosParaHora(inicioMinutos);
-                const horaFimFormatada = converterMinutosParaHora(fimAtividadeMinutos);
-                const horaFinalComExtraFormatada = converterMinutosParaHora(fimComExtraMinutos);
+                const fmtDeslocamento = converterMinutosParaHora(inicioDeslocamentoMinutos);
+                const fmtAcao = converterMinutosParaHora(inicioAcaoMinutos);
+                const fmtFimAcao = converterMinutosParaHora(fimAcaoMinutos);
+                const fmtFimTotal = converterMinutosParaHora(fimTotalMinutos);
 
-                // Criar link para Google Agenda
+                const horarioAlarmeCelular = tarefa.deslocamento > 0 ? fmtDeslocamento : fmtAcao;
+
+                // Google Agenda
                 const dataHoje = new Date().toISOString().split('T')[0].replace(/-/g, '');
-                const gCalStart = dataHoje + 'T' + horaInicioFormatada.replace(':', '') + '00';
-                const gCalEnd = dataHoje + 'T' + horaFimFormatada.replace(':', '') + '00';
+                const gCalStart = dataHoje + 'T' + fmtAcao.replace(':', '') + '00';
+                const gCalEnd = dataHoje + 'T' + fmtFimAcao.replace(':', '') + '00';
                 const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(tarefa.titulo)}&dates=${gCalStart}/${gCalEnd}&details=${encodeURIComponent('Gerado via SmartAgenda Pro')}`;
 
                 const div = document.createElement('div');
@@ -233,21 +356,30 @@
                         <div>
                             <h3 class="font-medium text-sm text-white ${tarefa.concluida ? 'line-through text-slate-400' : ''}">${tarefa.titulo}</h3>
                             <div class="flex flex-wrap items-center gap-2 mt-1">
+                                ${tarefa.deslocamento > 0 ? `<span class="bg-cyan-500/10 text-cyan-400 text-xs px-2 py-0.5 rounded border border-cyan-500/20 font-mono">🚗 Saída/Prep: ${fmtDeslocamento}</span>` : ''}
                                 <span class="bg-indigo-500/10 text-indigo-400 text-xs px-2 py-0.5 rounded border border-indigo-500/20 font-mono">
-                                    🕒 ${horaInicioFormatada} - ${horaFimFormatada}
+                                    🕒 Ação: ${fmtAcao} - ${fmtFimAcao}
                                 </span>
-                                ${tarefa.tempoExtra > 0 ? `<span class="bg-amber-500/10 text-amber-400 text-xs px-2 py-0.5 rounded border border-amber-500/20">⚡ +${tarefa.tempoExtra} min folga (fim real:${horaFinalComExtraFormatada})</span>` : ''}
+                                ${tarefa.tempoExtra > 0 ? `<span class="bg-amber-500/10 text-amber-400 text-xs px-2 py-0.5 rounded border border-amber-500/20">⚡ +${tarefa.tempoExtra} min extra (fim:${fmtFimTotal})</span>` : ''}
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 self-end sm:self-center">
+                        <!-- Google Agenda -->
                         <a href="${gCalUrl}" target="_blank" title="Adicionar ao Google Agenda" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition text-xs flex items-center gap-1.5">
                             <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
-                            <span class="hidden md:inline">Google Agenda</span>
                         </a>
-                        <button onclick="configurarAlarme('${tarefa.titulo}', '${horaInicioFormatada}')" title="Criar Alarme" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition text-xs flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <!-- Botão Alarme Celular -->
+                        <button onclick="abrirAlarmeCelular('${tarefa.titulo}', '${horarioAlarmeCelular}')" title="Configurar no Celular" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-cyan-300 transition text-xs flex items-center gap-1.5 border border-cyan-500/20">
+                            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <span class="hidden md:inline">Celular</span>
                         </button>
+                        <!-- Botão Alarme PC Site -->
+                        <button onclick="alternarAlarmeSite(${tarefa.id})" title="Ativar Alarme no Site (PC)" class="p-2 rounded-lg transition text-xs flex items-center gap-1.5 ${tarefa.alarmeSite ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'}">
+                            <svg class="w-4 h-4 ${tarefa.alarmeSite ? 'text-amber-400 animate-pulse' : 'text-slate-400'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            <span class="hidden md:inline">${tarefa.alarmeSite ? 'PC ON' : 'PC'}</span>
+                        </button>
+                        <!-- Excluir -->
                         <button onclick="excluirTarefa(${tarefa.id})" title="Excluir" class="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition text-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
@@ -257,29 +389,25 @@
             });
         }
 
-        function configurarAlarme(titulo, horario) {
-            alert(`Para programar seu alarme no celular:\n\nAbra o aplicativo de Relógio/Alarmes do seu smartphone e crie um alarme para as ${horario} com o nome: "${titulo}".`);
-        }
-
         function exportarCSV() {
+            const tarefas = dadosSemana[diaAtual];
             if (tarefas.length === 0) {
-                alert("Não há tarefas para exportar!");
+                alert("Não há tarefas para exportar neste dia!");
                 return;
             }
-            let csvContent = "data:text/csv;charset=utf-8,Titulo,Duracao(min),TempoExtra(min),Concluida\n";
+            let csvContent = "data:text/csv;charset=utf-8,Dia,Titulo,Deslocamento(min),Duracao(min),TempoExtra(min),Concluida\n";
             tarefas.forEach(t => {
-                csvContent += `"${t.titulo}",${t.duracao},${t.tempoExtra},${t.concluida ? 'Sim' : 'Não'}\n`;
+                csvContent += `"${nomesDias[diaAtual]}","${t.titulo}",${t.deslocamento},${t.duracao},${t.tempoExtra},${t.concluida ? 'Sim' : 'Não'}\n`;
             });
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "minha_agenda.csv");
+            link.setAttribute("download", `agenda_${diaAtual}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Executa render inicial
         renderizar();
     </script>
 </body>
